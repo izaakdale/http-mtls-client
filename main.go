@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"io"
 	"log"
 	"net/http"
@@ -31,11 +32,16 @@ func main() {
 	// 	panic("error appending certs from pem")
 	// }
 
+	caCertPool, err := x509.SystemCertPool()
+	if err != nil {
+		caCertPool = x509.NewCertPool()
+	}
+
 	cli := http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				Certificates: []tls.Certificate{crt},
-				// RootCAs:      caCertPool,
+				RootCAs:      caCertPool,
 			},
 		},
 	}
