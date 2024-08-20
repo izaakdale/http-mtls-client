@@ -17,24 +17,23 @@ func main() {
 		panic(err)
 	}
 
-	// fCa, err := os.OpenFile(os.Getenv("ROOT_CA"), os.O_RDONLY, os.ModeTemporary)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// pemBytes, err := io.ReadAll(fCa)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// caCertPool := x509.NewCertPool()
-	// ok := caCertPool.AppendCertsFromPEM(pemBytes)
-	// if !ok {
-	// 	panic("error appending certs from pem")
-	// }
-
 	caCertPool, err := x509.SystemCertPool()
 	if err != nil {
+		log.Printf("failed to load system cert pool: %s\n", err.Error())
 		caCertPool = x509.NewCertPool()
+
+		fCa, err := os.OpenFile(os.Getenv("ROOT_CA"), os.O_RDONLY, os.ModeTemporary)
+		if err != nil {
+			panic(err)
+		}
+		pemBytes, err := io.ReadAll(fCa)
+		if err != nil {
+			panic(err)
+		}
+		ok := caCertPool.AppendCertsFromPEM(pemBytes)
+		if !ok {
+			panic("error appending certs from pem")
+		}
 	}
 
 	cli := http.Client{
